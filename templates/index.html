@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choe Yun-ui's Movable Type Printing</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .character-box { display: inline-block; padding: 10px; margin: 5px; border: 1px solid black; cursor: grab; background-color: lightgray; }
+        .print-area { width: 50%; margin: auto; height: 200px; border: 2px dashed black; display: flex; align-items: center; justify-content: center; background-color: white; }
+        .printed { font-size: 24px; font-weight: bold; }
+        .buttons { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Hanja Movable Type Printing</h1>
+
+    <!-- Drag-and-Drop Characters -->
+    <h2>Available Hanja Characters</h2>
+    <div id="characters">
+        {% for char in characters %}
+        <div class="character-box" draggable="true" ondragstart="drag(event)" id="char-{{ char.id }}">{{ char.character }}</div>
+        {% endfor %}
+    </div>
+
+    <!-- Print Area -->
+    <h2>Arrange Your Printing Block</h2>
+    <div id="printArea" class="print-area" ondragover="allowDrop(event)" ondrop="drop(event)">
+        <p>Drag Hanja Characters Here</p>
+    </div>
+
+    <!-- Buttons -->
+    <div class="buttons">
+        <button onclick="applyInk()">Apply Ink</button>
+        <button onclick="printPage()">Print</button>
+    </div>
+
+    <script>
+        function allowDrop(event) {
+            event.preventDefault();
+        }
+
+        function drag(event) {
+            event.dataTransfer.setData("text", event.target.id);
+        }
+
+        function drop(event) {
+            event.preventDefault();
+            var charId = event.dataTransfer.getData("text");
+            var charElement = document.getElementById(charId);
+            var clonedChar = charElement.cloneNode(true);
+            clonedChar.removeAttribute("id"); // Remove ID to allow multiple copies
+            clonedChar.style.cursor = "default";
+            event.target.appendChild(clonedChar);
+        }
+
+        function applyInk() {
+            document.getElementById("printArea").style.backgroundColor = "black";
+            document.getElementById("printArea").style.color = "white";
+            setTimeout(() => {
+                document.getElementById("printArea").style.backgroundColor = "white";
+                document.getElementById("printArea").style.color = "black";
+            }, 2000);
+        }
+
+        function printPage() {
+            html2canvas(document.getElementById("printArea")).then(canvas => {
+                let link = document.createElement("a");
+                link.href = canvas.toDataURL("image/png");
+                link.download = "printed_page.png";
+                link.click();
+            });
+        }
+    </script>
+</body>
+</html>
